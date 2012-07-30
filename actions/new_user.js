@@ -5,12 +5,13 @@ var casper = require('casper').create({
 var x = require('casper').selectXPath;
 
 function generateName() {
-  if (casper.cli.has('name')) {
-    return casper.cli.get('name');
+  if (casper.cli.has('username')) {
+    return casper.cli.get('username');
   }
 
   else {
-    return 'lalaland'
+    casper.echo("Need to specify a username buddy")
+    casper.exit(1)
   }
 }
 
