@@ -5,7 +5,13 @@ var casper = require('casper').create({
 var x = require('casper').selectXPath;
 
 function generateName() {
-  return 'atomsapple';
+  if (casper.cli.has('name')) {
+    return casper.cli.get('name');
+  }
+
+  else {
+    return 'lalaland'
+  }
 }
 
 casper.start('http://news.ycombinator.com/submit', function () {
