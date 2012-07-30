@@ -121,7 +121,7 @@ def update_twoface():
 
 
 def create_new_user(username):
-    exec_string = 'casperjs --name=%s /opt/two-face/actions/new_user.js' % username
+    exec_string = 'casperjs --username=%s /opt/two-face/actions/new_user.js' % username
     stdin, stdout, stderr = client.exec_command(exec_string)
 
     print "s: "+stdout.read()
