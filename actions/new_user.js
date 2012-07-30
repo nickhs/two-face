@@ -23,7 +23,15 @@ casper.start('http://news.ycombinator.com/submit', function () {
 });
 
 casper.then(function () {
-  this.debugPage();
+  var ret = this.debugPage();
+  casper.log(ret);
+
+  if (ret.match('taken') != null) {
+    this.fill(x('/html/body/form[2]'), {
+      'u': generateName() + '1',
+      'p': 'password'
+    }, true);
+  }
 });
 
 casper.run(function () {
