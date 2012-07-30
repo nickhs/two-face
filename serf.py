@@ -12,29 +12,33 @@ KING_URL = "http://localhost:5000"
 KEY_FILE = "/home/nick/Downloads/ec2.pem"
 
 conn = None
+client = None
 
 def create(id, username, region='us-west-2'):
     make_connection(region)
-    instance = create_instance(id, username)
+    instance = create_instance()
     if instance is None:
         print "Something failed!"
         return
 
-    resp = create_new_user(id, username, instance.public_dns_name)
+    status = []
+    status.append(connect_ssh(instance.public_dns_name))
+    status.append(update_twoface())
+    status.append(create_new_user(username))
     
-    if resp is False:
-        terminate_instance(instance.id)
-        status = 'errored'
+    if [False, None] in status:
+        terminate_instance(instance)
+        tstatus = 'errored'
     else:
-        stop_instance(id, username, instance.id)
-        status = 'completed'
+        stop_instance(instance)
+        tstatus = 'completed'
         
     payload = {
             'id': id,
             'username': username,
             'instance': instance.id,
             'dns_name': instance.public_dns_name,
-            'state': status,
+            'state': tstatus,
     }
 
     try:
@@ -78,8 +82,8 @@ def create_instance():
     return instance
 
 
-def stop_instance(instance_id):
-    conn.stop_instances([instance_id])
+def stop_instance(instance):
+    conn.stop_instances([instance.id])
 
     while instance.state != 'stoppped':
         print 'Waiting on instance stop...'
@@ -87,30 +91,38 @@ def stop_instance(instance_id):
         instance.update()
 
 
-def terminate_instance(instance_id):
-    conn.terminate_instances([instance_id])
+def terminate_instance(instance):
+    conn.terminate_instances([instance.id])
 
     while instance.state != 'terminated':
         print 'Waiting on instance termination...'
         time.sleep(10)
         instance.update()
 
-
-def create_new_user(username, url):
-    client = ssh.SSHClient()
+def connect_ssh(url):
+    c = ssh.SSHClient()
     privkey = ssh.RSAKey.from_private_key_file(KEY_FILE)
-    client.set_missing_host_key_policy(ssh.AutoAddPolicy())
+    c.set_missing_host_key_policy(ssh.AutoAddPolicy())
 
     try:
-        client.connect(url, username='ubuntu', pkey=privkey)
-        print "Connected!"
-        exec_string = 'casperjs --name=%s /opt/two-face/actions/new_user.js' % username
-        stdin, stdout, stderr = client.exec_command(exec_string)
-
-        print stdout.read()
-        print stderr.read()
-        return True
-    
+        c.connect(url, username='ubuntu', pkey=privkey)
+        global client
+        client = c
     except Exception as e:
         print e
-        return False
+        return
+
+
+def update_twoface():
+    exec_string = 'cd /opt/two-face/ && sudo git pull'
+    stdin, stdout, stderr = client.exec_command(exec_string)
+    print "s: "+stdout.read()
+    print "e: "+stderr.read()
+
+
+def create_new_user(username):
+    exec_string = 'casperjs --name=%s /opt/two-face/actions/new_user.js' % username
+    stdin, stdout, stderr = client.exec_command(exec_string)
+
+    print "s: "+stdout.read()
+    print "e: "+stderr.read()
