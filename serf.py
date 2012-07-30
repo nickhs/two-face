@@ -85,7 +85,7 @@ def create_instance():
 def stop_instance(instance):
     conn.stop_instances([instance.id])
 
-    while instance.state != 'stoppped':
+    while instance.state != 'stopped':
         print 'Waiting on instance stop...'
         time.sleep(10)
         instance.update()
