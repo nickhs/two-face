@@ -104,7 +104,7 @@ def create_new_user(username, url):
     try:
         client.connect(url, username='ubuntu', pkey=privkey)
         print "Connected!"
-        exec_string = 'casperjs --name=%s /opt/two-face/troublemaker.js' % username
+        exec_string = 'casperjs --name=%s /opt/two-face/actions/new_user.js' % username
         stdin, stdout, stderr = client.exec_command(exec_string)
 
         print stdout.read()
