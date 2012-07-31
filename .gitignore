@@ -3,4 +3,4 @@
 test*
 *test
 *.db
-*.conf*
+serf_settings.py
