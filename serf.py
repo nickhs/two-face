@@ -161,7 +161,8 @@ def create_new_user(username):
 
 
 def perform_upvote(username, password, title):
-    exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (unicode(title), username, password)
+    title = title.decode('UTF-8')
+    exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (title, username, password)
     stdin, stdout, stderr = client.exec_command(exec_string)
 
     print "s: "+stdout.read()
