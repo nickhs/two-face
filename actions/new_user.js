@@ -1,7 +1,14 @@
 var casper = require('casper').create({
   verbose: true,
-  logLevel: 'debug'
+  logLevel: 'debug',
+  pageSettings: {
+    javascriptEnabled: true,
+    loadImages: true,
+    loadPlugins: true,
+    userAgent: 'Mozilla/5.0 (Linux; U; Android 2.3; en-us) AppleWebKit/999+ (KHTML, like Gecko) Safari/999.9',
+  }
 });
+
 var x = require('casper').selectXPath;
 
 function generateName() {
