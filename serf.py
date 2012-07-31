@@ -54,7 +54,7 @@ def upvote(id, username, password, instance_id, title, region='us-west-2'):
 
     connect_ssh(instance.public_dns_name)
     update_twoface()
-    upvote(username=username, password=password, title=title)
+    perform_upvote(username=username, password=password, title=title)
 
 
 def make_connection(region):
@@ -148,7 +148,7 @@ def create_new_user(username):
     print "e: "+stderr.read()
 
 
-def upvote(username, password, title):
+def perform_upvote(username, password, title):
     exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (title, username, password)
     stdin, stdout, stderr = client.exec_command(exec_string)
 
