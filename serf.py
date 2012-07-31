@@ -48,6 +48,15 @@ def create(id, username, region='us-west-2'):
         print payload
 
 
+def upvote(id, username, password, instance_id, title, region='us-west-2'):
+    make_connection(region)
+    instance = start_instances(instance_id)
+
+    connect_ssh(instance.public_dns_name)
+    update_twoface()
+    upvote(username=username, password=password, title=title)
+
+
 def make_connection(region):
     regions = boto.ec2.regions(aws_access_key_id=AWS_ACCESS_KEY_ID, 
                     aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
@@ -79,6 +88,17 @@ def create_instance():
     
     time.sleep(90)
     
+    return instance
+
+
+def start_instance(instance_id):
+    instance = conn.start_instances([instance_id])[0]
+
+    while instance.state != 'running':
+        time.sleep(10)
+        instance.update()
+        print "Waiting for instance to start..."
+
     return instance
 
 
@@ -128,8 +148,8 @@ def create_new_user(username):
     print "e: "+stderr.read()
 
 
-def upvote(text, username):
-    exec_string = 'casperjs --title="%s" --username=%s --password=password /opt/two-face/actions/upvote.js' % (text, username)
+def upvote(username, password, title):
+    exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (title, username, password)
     stdin, stdout, stderr = client.exec_command(exec_string)
 
     print "s: "+stdout.read()
