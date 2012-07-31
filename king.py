@@ -1,7 +1,7 @@
 from flask import Flask, request, url_for, redirect, render_template
 from flask_peewee.db import Database
 from flask_peewee.auth import Auth
-from flask_peewee.admin import Admin
+from flask_peewee.admin import Admin, ModelAdmin
 from peewee import *
 from wtfpeewee.orm import model_form
 import datetime
@@ -20,28 +20,51 @@ admin = Admin(app, auth)
 
 
 class Post(Model):
-    post_id = TextField()
+    post_id = TextField(null=True)
+    title = TextField()
     created = DateTimeField(default=datetime.datetime.now)
-    post_modified = DateTimeField()
+    post_modified = DateTimeField(null=True)
+
+    def __unicode__(self):
+        return self.title
 
 
-class Villain(Model):
-    name = TextField()
+class PostAdmin(ModelAdmin):
+    columns=('post_id', 'title', 'created', 'post_modified')
+
+
+class Person(Model):
+    username = TextField()
     password = TextField()
-    location = TextField()
     created = DateTimeField(default=datetime.datetime.now)
+    instance_id = TextField(null=True)
+
+    def __unicode__(self):
+        return self.username
+
+
+class PersonAdmin(ModelAdmin):
+    columns=('username', 'password', 'created', 'instance_id')
 
 
 class Command(Model):
     name = TextField()
     status = TextField()
-    user = None  #FIXME
-    post = None  #FIXME
+    description = TextField()
+    user = ForeignKeyField(Person, related_name='command')
+    post = ForeignKeyField(Post, related_name='command', null=True)
+
+    def __unicode__(self):
+        return self.name
 
 
-admin.register(Post)
-admin.register(Command)
-admin.register(Villain)
+class CommandAdmin(ModelAdmin):
+    columns=('name', 'status', 'user', 'post')
+    foreign_key_lookups = {'user': 'username'}
+
+admin.register(Post, PostAdmin)
+admin.register(Command, CommandAdmin)
+admin.register(Person, PersonAdmin)
 admin.setup()
 
 CommandForm = model_form(Command)
@@ -61,10 +84,6 @@ def command(id):
 
     if request.form['state'] == 'errored':
         app.logger.error("Task failed!")
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
