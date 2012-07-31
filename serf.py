@@ -2,6 +2,7 @@ import boto.ec2
 import requests
 import time
 import ssh
+from king import Person
 
 AWS_ACCESS_KEY_ID = "AKIAIZHHHKUHKBOUIJKA"
 AWS_SECRET_ACCESS_KEY = "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"
@@ -33,6 +34,8 @@ def create(id, username, region='us-west-2'):
         stop_instance(instance)
         tstatus = 'completed'
         
+    add_person(username, instance.id)
+    
     payload = {
             'id': id,
             'username': username,
@@ -48,13 +51,20 @@ def create(id, username, region='us-west-2'):
         print payload
 
 
+def add_person(username, instance_id, password='password'):
+    p = Person(username=username, instance_id=instance_id, password=password)
+    p.save()
+
+
 def upvote(id, username, password, instance_id, title, region='us-west-2'):
     make_connection(region)
-    instance = start_instances(instance_id)
+    instance = start_instance(instance_id)
 
     connect_ssh(instance.public_dns_name)
     update_twoface()
     perform_upvote(username=username, password=password, title=title)
+
+    stop_instance(instance)
 
 
 def make_connection(region):
@@ -98,6 +108,8 @@ def start_instance(instance_id):
         time.sleep(10)
         instance.update()
         print "Waiting for instance to start..."
+
+    time.sleep(90)
 
     return instance
 
@@ -149,7 +161,7 @@ def create_new_user(username):
 
 
 def perform_upvote(username, password, title):
-    exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (title, username, password)
+    exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (unicode(title), username, password)
     stdin, stdout, stderr = client.exec_command(exec_string)
 
     print "s: "+stdout.read()
