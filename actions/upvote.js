@@ -4,6 +4,7 @@ var casper = require('casper').create({
 });
 
 var x = require('casper').selectXPath;
+var to_look = '';
 
 function generatePossibleHref() {
   var r = [],
@@ -27,6 +28,12 @@ function clickOrNot(strength) {
 }
 
 casper.start('http://news.ycombinator.com/', function () {
+  if (this.cli.has("title")) {
+    to_look = this.cli.get("title");
+  } else {
+    this.log("No text specified!")
+  }
+
   this.click(x('/html/body/center/table/tbody/tr[1]/td/table/tbody/tr/td[3]/span[@class=\'pagetop\']/a'));
 });
 
@@ -48,7 +55,7 @@ casper.then(function () {
     var text = self.fetchText(x("/html/body/center/table/tbody/tr[3]/td/table/tbody/tr[" + num + "]/td[@class='title'][2]/a")),
       link = x("/html/body/center/table/tbody/tr[3]/td/table/tbody/tr[" + num + "]/td[@class='title'][2]/a");
 
-    if (text === 'Tips on Emacs Lisp programming') {
+    if (text === to_look) {
       match = true;
     }
 

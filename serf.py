@@ -126,3 +126,12 @@ def create_new_user(username):
 
     print "s: "+stdout.read()
     print "e: "+stderr.read()
+
+
+def upvote(text, username):
+    exec_string = 'casperjs --title="%s" --username=%s --password=password /opt/two-face/actions/upvote.js' % (text, username)
+    stdin, stdout, stderr = client.exec_command(exec_string)
+
+    print "s: "+stdout.read()
+    print "e: "+stderr.read()
+
