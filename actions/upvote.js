@@ -33,7 +33,7 @@ function clickOrNot(strength) {
   return false;
 }
 
-casper.start('http://news.ycombinator.com/', function () {
+casper.start('http://news.ycombinator.com/newest', function () {
   if (this.cli.has("title")) {
     to_look = this.cli.get("title");
   } else {
