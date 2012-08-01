@@ -49,18 +49,29 @@ def add_person(username, instance_id, password='password'):
     db.session.commit()
 
 
-def upvote(username, password, instance_id, title, region='us-west-2'):
+def kill(username):
+    make_connection()
+    p = Person.query.filter_by(username=username).first()
+    terminate_instance(p.instance_id)
+
+    db.session.delete(p)
+    db.session.commit()
+
+
+def upvote(username, title, region='us-west-2'):
+    p = Person.query.filter_by(username=username).first()
+
     make_connection(region)
-    instance = start_instance(instance_id)
+    instance = start_instance(p.instance_id)
 
     connect_ssh(instance.public_dns_name)
     update_twoface()
-    perform_upvote(username=username, password=password, title=title)
+    perform_upvote(username=p.username, password=p.password, title=title)
 
     stop_instance(instance)
 
 
-def make_connection(region):
+def make_connection(region='us-west-2'):
     regions = boto.ec2.regions(aws_access_key_id=AWS_ACCESS_KEY_ID, 
                     aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
@@ -117,7 +128,12 @@ def stop_instance(instance):
 
 
 def terminate_instance(instance):
-    conn.terminate_instances([instance.id])
+    if type(instance) == str or unicode:
+        id = instance
+    else:
+        id = instance.id
+
+    instance = conn.terminate_instances([id])[0]
 
     while instance.state != 'terminated':
         print 'Waiting on instance termination...'
