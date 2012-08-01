@@ -37,7 +37,7 @@ casper.start('http://news.ycombinator.com/', function () {
   if (this.cli.has("title")) {
     to_look = this.cli.get("title");
   } else {
-    this.log("No text specified!")
+    this.log("No text specified!", 'warning')
   }
 
   this.click(x('/html/body/center/table/tbody/tr[1]/td/table/tbody/tr/td[3]/span[@class=\'pagetop\']/a'));
