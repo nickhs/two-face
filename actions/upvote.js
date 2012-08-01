@@ -72,10 +72,8 @@ casper.then(function () {
     }
 
     if (match) {
-      self.debugPage();
       self.log("MATCH FOUND WE ARE GO", 'error');
       self.click(x("/html/body/center/table/tbody/tr[3]/td/table/tbody/tr[" + num + "]/td[2]/center/a"));
-      self.debugPage();
       match = false;
     }
 
