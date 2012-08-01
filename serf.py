@@ -2,13 +2,13 @@ import boto.ec2
 import requests
 import time
 import ssh
-from king import Person
+from nobleman import Person, db
 from serf_settings import *
 
 conn = None
 client = None
 
-def create(id, username, region='us-west-2'):
+def create(username, region='us-west-2'):
     make_connection(region)
     instance = create_instance()
     if instance is None:
@@ -30,7 +30,6 @@ def create(id, username, region='us-west-2'):
     add_person(username, instance.id)
     
     payload = {
-            'id': id,
             'username': username,
             'instance': instance.id,
             'dns_name': instance.public_dns_name,
@@ -46,10 +45,11 @@ def create(id, username, region='us-west-2'):
 
 def add_person(username, instance_id, password='password'):
     p = Person(username=username, instance_id=instance_id, password=password)
-    p.save()
+    db.session.add(p)
+    db.session.commit()
 
 
-def upvote(id, username, password, instance_id, title, region='us-west-2'):
+def upvote(username, password, instance_id, title, region='us-west-2'):
     make_connection(region)
     instance = start_instance(instance_id)
 
@@ -154,8 +154,13 @@ def create_new_user(username):
 
 
 def perform_upvote(username, password, title):
-    title = title.decode('UTF-8')
-    exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (title, username, password)
+    if title == '':
+        exec_string = 'casperjs --username=%s --password=%s /opt/two-face/actions/upvote.js' % (username, password)
+
+    else:
+        title = title.decode('UTF-8')
+        exec_string = 'casperjs --title="%s" --username=%s --password=%s /opt/two-face/actions/upvote.js' % (title, username, password)
+    
     stdin, stdout, stderr = client.exec_command(exec_string)
 
     print "s: "+stdout.read()

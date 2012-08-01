@@ -21,6 +21,9 @@ class Person(db.Model):
         self.password = password
         self.instance_id = instance_id
 
+    def __repr__(self):
+        return "<%s>" % self.username
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)

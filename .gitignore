@@ -4,3 +4,4 @@ test*
 *test
 *.db
 serf_settings.py
+input.txt
